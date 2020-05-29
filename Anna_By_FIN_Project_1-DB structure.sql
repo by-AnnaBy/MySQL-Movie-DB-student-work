@@ -19,7 +19,7 @@ USE boxoffice;
 
 DROP TABLE IF EXISTS films;  
 CREATE TABLE films(
-	id INT UNSIGNED NOT NULL,
+	id INT UNSIGNED NOT NULL UNIQUE,
 	film_id CHAR(10) NOT NULL PRIMARY KEY,
 	name VARCHAR(120) NOT NULL COMMENT 'Название фильма',
 	original_name VARCHAR(120) NOT NULL COMMENT 'Название фильм на языке оригинала',
@@ -112,7 +112,7 @@ CREATE TABLE films_genre(
 
 DROP TABLE IF EXISTS persons;
 CREATE TABLE persons(
-	id INT UNSIGNED NOT NULL,
+	id INT UNSIGNED NOT NULL UNIQUE,
 	person_id CHAR(10) NOT NULL PRIMARY KEY,
 	name_rus VARCHAR(120) NOT NULL,
 	name_eng VARCHAR(120) NOT NULL,
@@ -160,7 +160,7 @@ CREATE TABLE filmography(
 
 DROP TABLE IF EXISTS collections;
 CREATE TABLE collections(
-	id INT UNSIGNED NOT NULL,
+	id INT UNSIGNED NOT NULL UNIQUE,
 	collection_id CHAR(10) NOT NULL PRIMARY KEY,
 	name VARCHAR(255) NOT NULL,
 	
@@ -193,11 +193,11 @@ CREATE TABLE films_collections(
 
 DROP TABLE IF EXISTS events;
 CREATE TABLE events(
-	id INT UNSIGNED NOT NULL,
+	id INT UNSIGNED NOT NULL UNIQUE,
 	event_id CHAR(10) NOT NULL PRIMARY KEY,
-	event_name VARCHAR(200) NOT NULL,
-	event_award_name VARCHAR(200),
-	category VARCHAR(200) NOT NULL,
+	event_name VARCHAR(255) NOT NULL,
+	event_award_name VARCHAR(255),
+	category VARCHAR(255) NOT NULL,
 
 	INDEX(id),
 	INDEX(event_award_name),
@@ -215,14 +215,14 @@ CREATE TABLE events_competitions(
 	id INT UNSIGNED NOT NULL,
 	nomination_id CHAR(10) NOT NULL PRIMARY KEY,
 	film_id CHAR(10) NOT NULL,
-	year YEAR NOT NULL,
+	`year` YEAR NOT NULL,
 	award_id CHAR(10) NOT NULL,
 	award_result ENUM('Nominee', 'Winner'), -- Nominee or Winner
 	person_id CHAR(10),
 
-	INDEX(id),
 	INDEX(film_id),
 	INDEX(award_id),
+	UNIQUE INDEX(film_id, `year`, award_id, person_id),
 	
 	FOREIGN KEY (film_id) 
 		REFERENCES films(film_id)
@@ -230,7 +230,7 @@ CREATE TABLE events_competitions(
     	ON DELETE RESTRICT,
 	FOREIGN KEY (award_id) 
 		REFERENCES events(event_id)
-		ON UPDATE RESTRICT 
+		ON UPDATE CASCADE 
     	ON DELETE RESTRICT,
 	FOREIGN KEY (person_id) 
 		REFERENCES persons(person_id)
@@ -255,7 +255,7 @@ CREATE TABLE boxoffice_data(
 	`week` SMALLINT UNSIGNED NOT NULL, -- номер недели в году (Пон - Вск). иногда информацию можно найти только по неделям/уикэндам, поэтому она в приоритете над днём  
 	`date` DATE, -- может быть пустой, если по стране не собирают информацию по дням проката
 	day_of_week VARCHAR (10),
-	holiday_comment VARCHAR (255),
+	date_comment VARCHAR (255),
 	days_in_theaters SMALLINT UNSIGNED,
 	weeks_in_theaters SMALLINT UNSIGNED,
 	currency CHAR(3) DEFAULT "USD",
@@ -274,6 +274,8 @@ CREATE TABLE boxoffice_data(
 		ON UPDATE CASCADE 
     	ON DELETE RESTRICT
 ) COMMENT = 'Сборы фильма по дням по городам/странам';
+
+
 
 	
 
